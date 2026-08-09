@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VivaTrack - Automated Viva Assessment & Evaluation System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         APP HEADER / NAVBAR
+    ====================================================== -->
+    <header class="app-header">
+        <div class="brand" onclick="showHome()">
+            <div class="brand-icon">🎓</div>
+            <div>
+                <span class="brand-title">VivaTrack</span>
+                <span class="brand-badge">Lab Edition</span>
+            </div>
+        </div>
+
+        <div class="header-status">
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                <span id="systemStatusText">Lab Session Ready</span>
+            </div>
+            <button class="btn-secondary btn-sm" onclick="showHome()" id="navHomeBtn">Home</button>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         HOME / ROLE SELECTION
+    ====================================================== -->
+    <div id="homePage" class="page">
+        <div class="container hero-container">
+            <h1 class="hero-title">Automated Lab Viva Assessment System</h1>
+            <p class="hero-subtitle">Per-lab experiment Viva sessions, PDF Question Bank importer, 10-question random sampling, and automatic per-lab Excel sheet database generator.</p>
+
+            <div class="role-container">
+                <!-- STUDENT CARD -->
+                <div class="role-card">
+                    <div class="role-icon">✍️</div>
+                    <h2>Student Viva Portal</h2>
+                    <p>Select your assigned Batch (1 or 2), Group (1–6), Experiment, and enter your Register Number to start.</p>
+                    <button class="btn-primary btn-full" onclick="showStudentLogin()">Start Lab Viva →</button>
+                </div>
+
+                <!-- ADMIN CARD -->
+                <div class="role-card">
+                    <div class="role-icon">🛡️</div>
+                    <h2>Faculty / Admin</h2>
+                    <p>Upload PDF question banks (up to 50 Qs), evaluate student text answers, and export per-lab Excel worksheets.</p>
+                    <button class="btn-secondary btn-full" onclick="showAdminLogin()">Faculty Sign In →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         STUDENT LOGIN (WITH BATCH / GROUP / EXP SELECTORS)
+    ====================================================== -->
+    <div id="studentLoginPage" class="page hidden">
+        <div class="form-container" style="max-width: 520px;">
+            <div class="form-header">
+                <h2>Lab Viva Session Entry</h2>
+                <p>Select your lab session details and enter your register number.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="studentRegInput">Register Number *</label>
+                <input type="text" id="studentRegInput" placeholder="e.g. REG2026001" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="studentNameInput">Full Name *</label>
+                <input type="text" id="studentNameInput" placeholder="e.g. John Doe">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" class="form-group">
+                <div>
+                    <label for="studentBatchSelect">Batch *</label>
+                    <select id="studentBatchSelect">
+                        <option value="Batch 1">Batch 1</option>
+                        <option value="Batch 2">Batch 2</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="studentGroupSelect">Group *</label>
+                    <select id="studentGroupSelect">
+                        <option value="Group 1">Group 1</option>
+                        <option value="Group 2">Group 2</option>
+                        <option value="Group 3">Group 3</option>
+                        <option value="Group 4">Group 4</option>
+                        <option value="Group 5">Group 5</option>
+                        <option value="Group 6">Group 6</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="studentExperimentSelect">Assigned Lab Experiment *</label>
+                <select id="studentExperimentSelect">
+                    <option value="Experiment 1: Basic Programming & Data Types">Experiment 1: Basic Programming & Data Types</option>
+                    <option value="Experiment 2: OOP & Data Structures">Experiment 2: OOP & Data Structures</option>
+                    <option value="Experiment 3: Web Architecture & REST APIs">Experiment 3: Web Architecture & REST APIs</option>
+                    <option value="Experiment 4: SQL & Database Management">Experiment 4: SQL & Database Management</option>
+                </select>
+            </div>
+
+            <button class="btn-primary btn-full" onclick="startAssessment()">Start 10-Question Random Viva →</button>
+            <button class="btn-secondary btn-full" style="margin-top: 10px;" onclick="showHome()">Back to Home</button>
+
+            <p id="studentLoginMessage" class="message"></p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         ADMIN LOGIN
+    ====================================================== -->
+    <div id="adminLoginPage" class="page hidden">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Faculty Sign In</h2>
+                <p>Access VivaTrack management dashboard.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmail">Email Address</label>
+                <input type="email" id="adminEmail" placeholder="admin@institution.edu" value="admin@institution.edu">
+            </div>
+
+            <div class="form-group">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" placeholder="••••••••" value="admin123">
+            </div>
+
+            <button class="btn-primary btn-full" onclick="adminLogin()">Access Dashboard →</button>
+            <button class="btn-secondary btn-full" style="margin-top: 10px;" onclick="showHome()">Back to Home</button>
+
+            <p id="adminLoginMessage" class="message"></p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         STUDENT ASSESSMENT PAGE
+    ====================================================== -->
+    <div id="assessmentPage" class="page hidden">
+        <div class="assessment-container">
+            <!-- HEADER & TIMER -->
+            <div class="assessment-header">
+                <div class="assessment-info">
+                    <h2 id="studentAssessmentTitle">Viva Assessment</h2>
+                    <p id="questionNumber">Question 1 of 10</p>
+                </div>
+
+                <div class="timer-box" id="timerBox">
+                    <span class="timer-icon">⏱️</span>
+                    <span id="timer">03:00</span>
+                </div>
+            </div>
+
+            <!-- SESSION DETAILS BADGE -->
+            <div style="margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <span id="sessionBatchBadge" class="badge badge-info">Batch 1</span>
+                <span id="sessionGroupBadge" class="badge badge-warning">Group 1</span>
+                <span id="sessionExpBadge" class="badge badge-success">Exp 1</span>
+            </div>
+
+            <!-- PROGRESS BAR -->
+            <div class="progress-bar-container">
+                <div id="progressBarFill" class="progress-bar-fill"></div>
+            </div>
+
+            <!-- QUESTION CARD -->
+            <div class="question-card">
+                <div class="question-meta">
+                    <span id="qCategoryBadge" class="badge badge-info">General</span>
+                    <span id="qDifficultyBadge" class="badge badge-warning">Medium</span>
+                </div>
+
+                <h3 id="studentQuestionText">Question text will load here...</h3>
+
+                <div id="answerArea"></div>
+            </div>
+
+            <!-- CONTROLS -->
+            <div class="assessment-buttons">
+                <button class="btn-secondary" onclick="previousQuestion()" id="prevButton" style="visibility: hidden;">← Previous</button>
+                <div>
+                    <button class="btn-primary" id="nextButton" onclick="nextQuestion()">Next Question →</button>
+                    <button class="btn-success hidden" id="submitButton" onclick="submitAssessment()">Submit Viva Assessment ✓</button>
+                </div>
+            </div>
+
+            <p id="assessmentMessage" class="message"></p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         ASSESSMENT COMPLETE SCREEN
+    ====================================================== -->
+    <div id="completionPage" class="page hidden">
+        <div class="form-container completion-card">
+            <div class="completion-icon">✓</div>
+            <h2>Viva Assessment Submitted</h2>
+            <p>Your 10-question responses have been logged in the lab database sheet.</p>
+
+            <div class="completion-details">
+                <p><strong>Student Reg No:</strong> <span id="completionStudent">--</span></p>
+                <p><strong>Lab Session:</strong> <span id="completionSession">--</span></p>
+                <p><strong>Questions Answered:</strong> <span id="completionQuestions">--</span></p>
+                <p><strong>MCQ Score:</strong> <span id="completionScore">--</span></p>
+                <p><strong>Saved Excel Sheet:</strong> <span id="completionLabSheet" class="badge badge-info">--</span></p>
+                <p><strong>Evaluation Status:</strong> <span id="completionStatus" class="badge badge-warning">Pending Review</span></p>
+            </div>
+
+            <button class="btn-primary btn-full" onclick="showHome()">Return to Main Portal</button>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         ADMIN DASHBOARD
+    ====================================================== -->
+    <div id="adminDashboard" class="page hidden">
+        <div class="dashboard-container">
+
+            <!-- HEADER -->
+            <div class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>VivaTrack Dashboard</h1>
+                    <p id="adminWelcome">Welcome, Lab Administrator</p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-primary btn-sm" onclick="openPdfModal()">📄 Upload Question Bank PDF</button>
+                    <button class="btn-success btn-sm" onclick="seedSampleQuestions()">🌱 Seed Default Questions</button>
+                    <button class="btn-secondary btn-sm" onclick="exportReport()">📥 Export Main Report</button>
+                    <button class="btn-danger btn-sm" onclick="showHome()">Sign Out</button>
+                </div>
+            </div>
+
+            <!-- TAB BAR -->
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('overviewTab', this)">📊 Overview Stats</button>
+                <button class="tab-btn" onclick="switchTab('studentsTab', this)">👨‍🎓 Students & Evaluation</button>
+                <button class="tab-btn" onclick="switchTab('questionsTab', this)">❓ Question Bank (Max 50)</button>
+                <button class="tab-btn" onclick="switchTab('labSheetsTab', this)">🔬 Per-Lab Excel Sheets</button>
+            </div>
+
+            <!-- ================= TAB 1: OVERVIEW ================= -->
+            <div id="overviewTab" class="tab-content">
+                <div class="dashboard-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">👨‍🎓</div>
+                        <div class="stat-info">
+                            <h4>Total Students</h4>
+                            <div class="stat-value" id="studentCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon purple">❓</div>
+                        <div class="stat-info">
+                            <h4>Question Bank</h4>
+                            <div class="stat-value" id="questionCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">✓</div>
+                        <div class="stat-info">
+                            <h4>Completed</h4>
+                            <div class="stat-value" id="completedCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon amber">⏳</div>
+                        <div class="stat-info">
+                            <h4>Pending Review</h4>
+                            <div class="stat-value" id="pendingCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-section">
+                    <div class="section-title">
+                        <h2>Academic Lab Setup</h2>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                        <div style="background: rgba(15, 23, 42, 0.5); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <h3 style="color: #818cf8; margin-bottom: 8px;">Batch 1 (Groups 1–6)</h3>
+                            <p style="color: var(--text-secondary); font-size: 14px;">Assigned Experiments 1 & 2 per group. 1 experiment conducted per lab day.</p>
+                        </div>
+                        <div style="background: rgba(15, 23, 42, 0.5); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <h3 style="color: #38bdf8; margin-bottom: 8px;">Batch 2 (Groups 1–6)</h3>
+                            <p style="color: var(--text-secondary); font-size: 14px;">Assigned Experiments 3 & 4 per group. 1 experiment conducted per lab day.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 2: STUDENTS & EVALUATION ================= -->
+            <div id="studentsTab" class="tab-content hidden">
+                <!-- REGISTER STUDENT SECTION -->
+                <div class="dashboard-section">
+                    <div class="section-title">
+                        <h2>Register New Student</h2>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <input type="text" id="studentRegisterNo" placeholder="Register Number (e.g. REG101)" style="flex: 1; min-width: 180px;">
+                        <input type="text" id="studentName" placeholder="Full Student Name" style="flex: 1; min-width: 180px;">
+                        <select id="studentBatch" style="flex: 1; min-width: 140px;">
+                            <option value="">Select Batch</option>
+                            <option value="Batch 1">Batch 1</option>
+                            <option value="Batch 2">Batch 2</option>
+                        </select>
+                        <button class="btn-primary" onclick="registerStudent()">Register Student +</button>
+                    </div>
+                    <p id="registrationMessage" class="message"></p>
+                </div>
+
+                <!-- STUDENT LIST & EVALUATION TABLE -->
+                <div class="dashboard-section">
+                    <div class="section-title">
+                        <h2>Registered Students & Evaluation</h2>
+                    </div>
+
+                    <div class="filter-bar">
+                        <input type="text" id="searchStudentInput" placeholder="🔍 Search by name or reg no..." onkeyup="filterStudents()">
+                        <select id="filterStatusSelect" onchange="filterStudents()">
+                            <option value="ALL">All Statuses</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending Review">Pending Review</option>
+                        </select>
+                    </div>
+
+                    <div class="table-responsive">
+                        <div id="studentTable"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 3: QUESTION BANK ================= -->
+            <div id="questionsTab" class="tab-content hidden">
+                <!-- ADD QUESTION FORM -->
+                <div class="dashboard-section">
+                    <div class="section-title">
+                        <h2>Add Question to Bank (Max 50 Qs)</h2>
+                        <button class="btn-primary btn-sm" onclick="openPdfModal()">📄 Import PDF Question Bank</button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <input type="text" id="questionId" placeholder="Question ID (e.g. Q201)">
+                        <input type="text" id="questionCategory" placeholder="Category (e.g. Python, SQL, Web)">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <textarea id="adminQuestionInput" rows="3" placeholder="Enter question statement here..."></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <select id="questionType" onchange="toggleMCQOptions()">
+                            <option value="">Select Question Type</option>
+                            <option value="MCQ">Multiple Choice (MCQ)</option>
+                            <option value="Text">Text Response (Viva Answer)</option>
+                        </select>
+                        <select id="questionDifficulty">
+                            <option value="">Select Difficulty</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <!-- MCQ OPTIONS DIV -->
+                    <div id="mcqOptions" style="display: none; background: rgba(15, 23, 42, 0.5); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 15px;">
+                        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">MCQ Options</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" id="optionA" placeholder="Option A">
+                            <input type="text" id="optionB" placeholder="Option B">
+                            <input type="text" id="optionC" placeholder="Option C">
+                            <input type="text" id="optionD" placeholder="Option D">
+                        </div>
+                        <select id="correctAnswer">
+                            <option value="">Select Correct Answer Letter</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary" onclick="addQuestion()">Add Question to Bank +</button>
+                    <p id="questionMessage" class="message"></p>
+                </div>
+
+                <!-- QUESTIONS TABLE -->
+                <div class="dashboard-section">
+                    <div class="section-title">
+                        <h2>Active Question Bank</h2>
+                    </div>
+
+                    <div class="table-responsive">
+                        <div id="questionTable"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= TAB 4: PER-LAB EXCEL SHEETS ================= -->
+            <div id="labSheetsTab" class="tab-content hidden">
+                <div class="dashboard-section">
+                    <div class="section-title">
+                        <h2>Per-Lab Session Excel Database Sheets</h2>
+                        <button class="btn-secondary btn-sm" onclick="loadLabSheets()">🔄 Refresh List</button>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">After each lab session, a separate worksheet is created in <code style="color: #a5b4fc;">VivaTrack.xlsx</code> storing all student answers and grades for that specific lab date, batch, group, and experiment.</p>
+
+                    <div class="table-responsive">
+                        <div id="labSheetsTable"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- =====================================================
+         TEACHER EVALUATION MODAL
+    ====================================================== -->
+    <div id="evalModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Evaluate Student Viva</h3>
+                <button class="close-btn" onclick="closeEvalModal()">✕</button>
+            </div>
+
+            <div id="evalStudentDetails" style="margin-bottom: 20px; color: var(--text-secondary);"></div>
+
+            <div id="evalResponsesList"></div>
+
+            <div style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <div class="form-group">
+                    <label for="evalScoreInput">Assign Final Score (0–10)</label>
+                    <input type="number" id="evalScoreInput" min="0" max="10" placeholder="e.g. 8">
+                </div>
+                <div class="form-group">
+                    <label for="evalRemarksInput">Faculty Remarks / Feedback (Optional)</label>
+                    <input type="text" id="evalRemarksInput" placeholder="e.g. Good understanding of data structures">
+                </div>
+                <button class="btn-success btn-full" onclick="saveStudentEvaluation()">Submit Final Evaluation & Score ✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         PDF UPLOAD MODAL
+    ====================================================== -->
+    <div id="pdfModal" class="modal-overlay hidden">
+        <div class="modal-card" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3>Import PDF Question Bank</h3>
+                <button class="close-btn" onclick="closePdfModal()">✕</button>
+            </div>
+
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">Upload a PDF document provided by the team leader containing up to 50 viva questions. The system will automatically extract MCQs and Text Viva questions.</p>
+
+            <div class="form-group">
+                <label for="pdfFileInput">Select PDF File</label>
+                <input type="file" id="pdfFileInput" accept=".pdf">
+            </div>
+
+            <button class="btn-primary btn-full" onclick="uploadPdfQuestionBank()">Upload & Extract Questions 📄</button>
+            <p id="pdfUploadMessage" class="message"></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
