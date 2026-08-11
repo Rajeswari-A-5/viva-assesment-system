@@ -33,7 +33,7 @@ import io
 
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, origins=["https://viva-assesment-system-qceo-git-main-raji13.vercel.app"])
 
 
 # =========================================================
