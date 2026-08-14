@@ -33,8 +33,10 @@ import io
 
 app = Flask(__name__)
 
-CORS(app, origins=["https://viva-assesment-system-qceo-git-main-raji13.vercel.app"])
-
+CORS(app, origins=[
+    "https://viva-assesment-system-qceo.vercel.app",
+    "https://viva-assesment-system-qceo-git-main-raji13.vercel.app"
+])
 
 # =========================================================
 # CREATE EXCEL FILE & SEED DEFAULT QUESTIONS
